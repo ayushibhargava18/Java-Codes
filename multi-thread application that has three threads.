@@ -32,3 +32,79 @@ public class Javafile {
         }
     }
 }
+
+Example 
+
+package javafile;
+import java.util.Random;
+
+public class Javafile {
+    public static void main(String[] args) {
+        Thread randomNumberGenerator = new Thread(new RandomNumberGenerator(), "RandomNumberGenerator");
+        Thread evenSquareThread = new Thread(new EvenSquareThread(), "EvenSquareThread");
+        Thread oddCubeThread = new Thread(new OddCubeThread(), "OddCubeThread");
+
+        randomNumberGenerator.start();
+        evenSquareThread.start();
+        oddCubeThread.start();
+    }
+
+   static class RandomNumberGenerator implements Runnable {
+        static Random random = new Random();
+
+        public void run() {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    int randomNumber = random.nextInt(100); 
+                    System.out.println("Generated Random Number: " + randomNumber);
+                    
+                    synchronized (this) {
+                        this.notifyAll();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    static class EvenSquareThread implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                synchronized (RandomNumberGenerator.class) {
+                    try (
+                        RandomNumberGenerator.class.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (RandomNumberGenerator.random % 2 == 0) {
+                    int square = RandomNumberGenerator.random * RandomNumberGenerator.random;
+                    System.out.println("Square of " + RandomNumberGenerator.random + " is " + square);
+                }
+            }
+        }
+    }
+
+    static class OddCubeThread implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                synchronized (RandomNumberGenerator.class) {
+                    try {
+                        RandomNumberGenerator.class.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (RandomNumberGenerator.random % 2 != 0) {
+                    int cube = RandomNumberGenerator.random * RandomNumberGenerator.random * RandomNumberGenerator.random;
+                    System.out.println("Cube of " + RandomNumberGenerator.random + " is " + cube);
+                }
+            }
+        }
+    }
+}
