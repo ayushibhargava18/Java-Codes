@@ -1,0 +1,21 @@
+package abstracttest;
+
+abstract class hello
+{
+    abstract void hey();
+}
+
+class hii extends hello
+{
+    void hey()
+    {
+        System.out.println("abstract classes and functions");
+    }
+}
+public class Abstracttest {
+
+    public static void main(String[] args) {
+        hii obj = new hii();
+        obj.hey();
+    }   
+}
